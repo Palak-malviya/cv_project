@@ -1,65 +1,108 @@
-# Copy-Move Forgery Detection
+# 🔍 Copy-Move Image Forgery Detection
 
-## Overview
-This tool detects copy-move forgeries in images (where a region of an image is copied and pasted elsewhere in the same image) using classical computer vision techniques.
+![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+![OpenCV](https://img.shields.io/badge/OpenCV-4.x-green)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
-## How It Works
-1. **SIFT Keypoint Extraction**: Identifies distinctive, scale- and rotation-invariant features in the image.
-2. **Self-Matching**: Matches the image's keypoints against themselves using FLANN and a modified Lowe's ratio test to find duplicated features.
-3. **RANSAC Filtering**: Fits a geometric transformation model (Affine) to the matched pairs to remove outliers and keep only spatially consistent matches.
-4. **Clustering & Localization**: Uses DBSCAN to group the matched keypoints into distinct spatial regions and draws convex hulls around them.
+A robust, classical Computer Vision pipeline to detect single-image **copy-move forgeries** (where a region of an image is copied and pasted elsewhere in the same image to hide or duplicate elements). 
 
-## Features
-- End-to-end classical CV pipeline without deep learning.
-- High resilience to scaling, rotation, and slight noise in forged regions.
-- Automatically generates a visual summary and a JSON report.
-- Confidence scoring based on match strength and area.
+This project relies entirely on mathematical models and geometric verification rather than deep learning, meaning it requires **zero training data** and works out-of-the-box on any image.
 
-## Tech Stack
-- Python 3
-- OpenCV (SIFT, RANSAC, geometry, visualization)
-- scikit-learn (DBSCAN clustering)
-- NumPy & SciPy (matrix operations)
-- Matplotlib (summary figure generation)
+---
 
-## Installation & Setup
-1. Clone this repository or navigate to the project directory.
-2. Install dependencies:
+## 📖 Problem Statement
+With the proliferation of digital media, image manipulation has become incredibly accessible. Detecting copy-move forgeries manually can be extremely difficult, especially if the pasted region has been slightly rotated, scaled, or blended.
+
+This tool provides a fast, deterministic, and explainable way to flag suspicious images for digital forensics students, researchers, content moderators, and journalists.
+
+---
+
+## 🚀 How It Works (The Pipeline)
+
+The detection algorithm is broken down into a 4-step pipeline:
+
+1. **Keypoint Extraction (SIFT)**: Identifies distinctive, scale- and rotation-invariant features in the image. SIFT is used because it is highly robust to scaling, rotation, and slight noise in forged regions.
+2. **Self-Matching (FLANN)**: Matches the image's keypoints against themselves. We use a modified Lowe's ratio test and a minimum spatial distance threshold to exclude trivial adjacent matches.
+3. **Geometric Filtering (RANSAC)**: Fits an Affine transformation model to the matched pairs to remove outliers. This ensures that the matched points move together consistently, as a real copy-paste forgery would.
+4. **Clustering & Localization (DBSCAN)**: Groups the verified matched keypoints into distinct spatial regions (the source and the destination) and computes convex hulls to localize the forgery boundaries.
+
+---
+
+## 🛠️ Tech Stack
+- **OpenCV**: SIFT feature extraction, RANSAC geometric filtering, visualization.
+- **scikit-learn**: DBSCAN spatial clustering.
+- **NumPy & SciPy**: Matrix operations and point math.
+- **Matplotlib**: Generating visual summary grids.
+
+---
+
+## ⚙️ Installation & Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/ananyasharma-dev/CV-Project.git
+   cd CV-Project
+   ```
+
+2. **Install the required dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
+   *(Note: `opencv-contrib-python` is required for access to the SIFT algorithm).*
 
-## Usage
-Run the script via the command line:
+---
+
+## 💻 Usage
+
+Run the script via the command line, pointing it to an input image:
+
 ```bash
 python main.py --input sample_images/forged/my_image.jpg
 ```
 
-Optional arguments:
-- `--output`: Directory to save reports and visual summaries (default: `output/`).
-- `--min-matches`: Minimum number of inlier matches to consider a forgery.
-- `--ransac-threshold`: Reprojection error threshold for RANSAC.
-- `--dbscan-eps`: Spatial distance threshold for clustering points into regions.
-- `--verbose`: Enable verbose logging.
+### CLI Arguments:
+| Argument | Description | Default |
+|----------|-------------|---------|
+| `--input` | **(Required)** Path to the input image to analyze. | None |
+| `--output` | Directory to save reports and visual summaries. | `output/` |
+| `--min-matches` | Minimum number of inlier matches to consider a forgery. | `4` |
+| `--ransac-threshold` | Reprojection error threshold for RANSAC filtering. | `5.0` |
+| `--dbscan-eps` | Spatial distance threshold for clustering points into regions. | `40.0` |
+| `--verbose` | Enables detailed debug logging in the console. | `False` |
 
-## Example Output
-The tool will output a console summary, e.g.:
-```
+---
+
+## 📊 Example Output
+
+The tool will output a quick summary to the console:
+```text
 ========================================
 FORGERY DETECTION SUMMARY
 ========================================
 Input Image       : sample_images/forged/my_image.jpg
-Raw Matches       : 45
-Inlier Matches    : 22
+Raw Matches       : 128
+Inlier Matches    : 45
 Suspected Regions : 2
-Confidence Score  : 0.85 (0=Authentic, 1=Forged)
-Total Time        : 0.35 s
+Confidence Score  : 0.92 (0=Authentic, 1=Forged)
+Total Time        : 0.42 s
 ========================================
 ```
-It will also create a summary PNG and a JSON report in the `output/` directory.
 
-## Testing
-Run the unit tests using `unittest`:
+It will also generate a **visual summary figure** (`.png`) and a **metrics report** (`.json`) inside the `output/` directory, showing the exact steps of the pipeline and the localized regions.
+
+---
+
+## 🧪 Testing
+
+The repository includes unit tests for the core detection modules using synthetic data (ensuring controlled ground truth). To run the test suite:
+
 ```bash
 python -m unittest discover tests/
 ```
+
+---
+
+## ⚠️ Known Limitations
+Because this pipeline relies on classical keypoint matching, it may trigger **false positives** on images with highly symmetric or repetitive natural textures (e.g., brick walls, tiled floors, chain-link fences). This is a well-known limitation of local feature matching approaches.
+
+Additionally, this tool specifically detects *copy-move* manipulations. It will not detect *splicing* (elements pasted from a completely different image) or AI-generated Deepfakes.
