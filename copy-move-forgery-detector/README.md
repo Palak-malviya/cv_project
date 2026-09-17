@@ -3,6 +3,7 @@
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
 ![OpenCV](https://img.shields.io/badge/OpenCV-4.x-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
+[![Web App Demo](https://img.shields.io/badge/🚀_Live_Demo-Hugging_Face_Spaces-yellow)](https://huggingface.co/spaces/YOUR_USERNAME/copy-move-forgery-detector)
 
 A robust, classical Computer Vision pipeline to detect single-image **copy-move forgeries** (where a region of an image is copied and pasted elsewhere in the same image to hide or duplicate elements). 
 
