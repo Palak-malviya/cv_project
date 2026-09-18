@@ -97,10 +97,9 @@ The repository includes unit tests for the core detection modules using syntheti
 python -m unittest discover tests/
 ```
 ## Project credits: **
-Name = Ananya Sharma 
-Reg. no = 24BAI10039
-Computer vision project (Copy-Move Image Forgery Detection)
-Prof. Neha Rathore 
+Name = Palak Malviya
+Reg. no = 24BAI10478
+Computer vision project (Copy-Move Image Forgery Detection) 
 ##  Known Limitations
 Because this pipeline relies on classical keypoint matching, it may trigger **false positives** on images with highly symmetric or repetitive natural textures (e.g., brick walls, tiled floors, chain-link fences). This is a well-known limitation of local feature matching approaches.
 
